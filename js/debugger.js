@@ -217,7 +217,7 @@ export const getTabDiagnostics = async tabId => {
     }
   } catch (error) { connection = { ...connection, error: errorText(error) } }
   return {
-    extension: { name: 'LC-time', version: chrome.runtime.getManifest().version },
+    extension: { id: chrome.runtime.id, name: 'LC-time', version: chrome.runtime.getManifest().version },
     capturedAt: new Date().toISOString(), browser, connection,
     operation: { running: !!stateFor(tabId).active, stage: stateFor(tabId).stage, startedAt: stateFor(tabId).startedAt },
     status: status || { code: 'unknown', message: '此页面还没有核验记录。' },

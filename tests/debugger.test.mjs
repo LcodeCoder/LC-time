@@ -18,7 +18,7 @@ async function setup() {
   const onDetach = event()
   const harness = { local, session, owners, zones, calls, tabs, onDetach, readback: null, failure: null }
   globalThis.chrome = {
-    runtime: { getManifest: () => ({ version: '1.4.1' }) },
+    runtime: { id: 'lc-time-test-id', getManifest: () => ({ version: '1.4.2' }) },
     fontSettings: fakeFontSettings(),
     storage: {
       local: { get: async () => ({ ...local }), set: async (data) => { Object.assign(local, data) } },
@@ -243,7 +243,8 @@ test('diagnostics retain the failed stage and detach reason without URLs or coor
   h.owners.delete(1)
   for (const listener of h.onDetach.listeners) listener({ tabId: 1 }, 'canceled_by_user')
   const diagnostic = await h.manager.getTabDiagnostics(1)
-  assert.equal(diagnostic.extension.version, '1.4.1')
+  assert.equal(diagnostic.extension.version, '1.4.2')
+  assert.equal(diagnostic.extension.id, 'lc-time-test-id')
   assert.equal(diagnostic.connection.owned, false)
   assert.equal(diagnostic.status.diagnostics.lastDetach.reason, 'canceled_by_user')
   assert.equal(diagnostic.status.diagnostics.requested.timezone, 'America/Los_Angeles')

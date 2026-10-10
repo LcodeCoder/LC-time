@@ -16,16 +16,33 @@ class CDP {
  async evaluate(sessionId,expression){const r=await this.send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true},sessionId);if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value}
 }
 async function waitFor(fn,label,timeout=12000){const start=Date.now();while(Date.now()-start<timeout){const v=await fn();if(v)return v;await sleep(80)}throw Error(`Timeout: ${label}`)}
-async function launch(label, options={}){
+async function launchBrowser(label, options={}) {
  const dir=options.dir||await mkdtemp(path.join(require('node:os').tmpdir(),`lc-time-${label}-`))
+ await mkdir(dir,{recursive:true})
  await rm(path.join(dir,'DevToolsActivePort'),{force:true})
- const proc=spawn(chromePath,[`--user-data-dir=${dir}`,...(options.headed?[]:['--headless=new']),...(options.args||[]),'--no-first-run','--no-default-browser-check','--remote-debugging-port=0',`--disable-extensions-except=${extensionPath}`,`--load-extension=${extensionPath}`,'about:blank'],{stdio:['ignore','ignore',require('node:fs').openSync(path.join(dir,'test-chrome.log'),'a')],env:{...process.env,TZ:'Asia/Shanghai'}})
- const port=await waitFor(async()=>{try{return (await readFile(path.join(dir,'DevToolsActivePort'),'utf8')).split('\n')[0]}catch{return false}},'Chrome startup')
- const version=await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();const cdp=await CDP.connect(version.webSocketDebuggerUrl)
- const worker=await waitFor(async()=>(await cdp.send('Target.getTargets')).targetInfos.find(t=>t.type==='service_worker'&&t.url.endsWith('/js/background.js')),'extension worker')
- const {sessionId}=await cdp.send('Target.attachToTarget',{targetId:worker.targetId,flatten:true})
- await waitFor(()=>cdp.evaluate(sessionId,"typeof chrome !== 'undefined' && !!chrome.runtime?.id"),'extension API initialization')
- return {label,dir,port,proc,cdp,sessionId,extensionId:new URL(worker.url).host,eval:exp=>cdp.evaluate(sessionId,exp),close:async()=>{await cdp.send('Browser.close').catch(()=>{});cdp.ws.close();await waitFor(()=>proc.exitCode!==null||proc.signalCode!==null,'Chrome exit',5000).catch(()=>proc.kill())}}
+ const extensionPaths=options.extensionPaths??[extensionPath]
+ const extensionArgs=extensionPaths.length?[`--disable-extensions-except=${extensionPaths.join(',')}`,`--load-extension=${extensionPaths.join(',')}`]:[]
+ const proc=spawn(chromePath,[`--user-data-dir=${dir}`,...(options.headed?[]:['--headless=new']),...(options.args||[]),'--no-first-run','--no-default-browser-check','--remote-debugging-port=0',...extensionArgs,'about:blank'],{stdio:['ignore','ignore',require('node:fs').openSync(path.join(dir,'test-chrome.log'),'a')],env:{...process.env,TZ:'Asia/Shanghai'}})
+ let cdp
+ const close=async()=>{
+  if(cdp){await cdp.send('Browser.close').catch(()=>{});cdp.ws.close()}
+  await waitFor(()=>proc.exitCode!==null||proc.signalCode!==null,'Chrome exit',5000).catch(()=>proc.kill())
+ }
+ try {
+  const port=await waitFor(async()=>{try{return (await readFile(path.join(dir,'DevToolsActivePort'),'utf8')).split('\n')[0]}catch{return false}},'Chrome startup')
+  const version=await (await fetch(`http://127.0.0.1:${port}/json/version`)).json()
+  cdp=await CDP.connect(version.webSocketDebuggerUrl)
+  return {label,dir,port,proc,cdp,close}
+ } catch(error) {await close();throw error}
+}
+async function launch(label, options={}) {
+ const browser=await launchBrowser(label,options)
+ try {
+  const worker=await waitFor(async()=>(await browser.cdp.send('Target.getTargets')).targetInfos.find(t=>t.type==='service_worker'&&t.url.endsWith('/js/background.js')),'extension worker')
+  const {sessionId}=await browser.cdp.send('Target.attachToTarget',{targetId:worker.targetId,flatten:true})
+  await waitFor(()=>browser.cdp.evaluate(sessionId,"typeof chrome !== 'undefined' && !!chrome.runtime?.id"),'extension API initialization')
+  return {...browser,sessionId,extensionId:new URL(worker.url).host,eval:exp=>browser.cdp.evaluate(sessionId,exp)}
+ } catch(error) {await browser.close();throw error}
 }
 const reports=new Map()
 const server=http.createServer((req,res)=>{
@@ -35,4 +52,4 @@ const server=http.createServer((req,res)=>{
  const id=url.searchParams.get('id')
  res.end(`<!doctype html><title>Timezone test</title><script>const initial=Intl.DateTimeFormat().resolvedOptions().timeZone;const report=()=>fetch('/report?id=${id}&data='+encodeURIComponent(JSON.stringify({initial,zone:Intl.DateTimeFormat().resolvedOptions().timeZone,offset:new Date().getTimezoneOffset(),time:Date.now()})));report();setInterval(report,150)</script><h1>Timezone regression</h1>`)
 })
-module.exports={CDP,launch,waitFor,sleep,reports,server,resultPath}
+module.exports={CDP,launch,launchBrowser,waitFor,sleep,reports,server,resultPath}

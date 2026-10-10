@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "description": "__MSG_extDesc__",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "author": "LC-time",
   "default_locale": "en",
   "background": {
@@ -27,5 +27,6 @@
     "alarms",
     "fontSettings"
   ],
-  "minimum_chrome_version": "125"
+  "minimum_chrome_version": "125",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjquKnWsvyOuLfohAKRI/YSnXpP3c2xDsSIFnyMSV3P85+88sd4wgJd12ZF5t99eNF/vfc+hkb+uwWIPbmiTcqIzc58TyzkffwNbm33rQSLFBjhjc6kGtgiu9KM7wZ4SLaQnRwsShFy23Nj5hT/mVCl3wInlk2c/95XPijRH3CAuTJtetUzd8JL9Fto7sD8epkOBc5Q2b5dplaBJyBb9l63RJovNFj0OpPxH8NVn/6kSMtxVy1lwnSb3tUB02XSTlAdWlnhU47imgRaPzOksRBV+rN+zCCk1nQg+LQ6Ic9nXtndifMhRbB4zzVjLCAvbGbtNbMni2b9h8bf0z+Nl4dQIDAQAB"
 }

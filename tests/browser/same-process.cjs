@@ -49,7 +49,7 @@ const assert = require('node:assert/strict')
     await waitFor(() => popup("!!document.querySelector('#ipTimezoneToggle')?.checked && document.querySelector('#saveStatus')?.dataset.state==='saved'"), 'popup verifies second profile')
 
     // Seed the stale persisted state, keeping the actual native connection live.
-    // This reproduces the recovery bug deterministically, not its unknown trigger.
+    // The native different-ID trigger is covered separately in identity.cjs.
     const stale = `chrome.storage.session.set({'lc-time-tab:${second.tab.id}':{tabId:${second.tab.id},ok:false,code:'paused',message:'legacy pause'}})`
     await second.evaluate(stale)
     const rechecked = await popup(`chrome.runtime.sendMessage({type:'check-current-tab',tabId:${second.tab.id}})`)
@@ -71,7 +71,8 @@ const assert = require('node:assert/strict')
     // Exercise the button without changing the system clipboard.
     await popup("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.copiedDiagnostic=text}}});document.querySelector('#diagnosticsButton').click()")
     const diagnostic = await waitFor(() => popup('window.copiedDiagnostic && JSON.parse(window.copiedDiagnostic)'), 'copied diagnostic')
-    assert.equal(diagnostic.extension.version, '1.4.1')
+    assert.equal(diagnostic.extension.version, require('../../manifest.json').version)
+    assert.equal(diagnostic.extension.id, new URL(second.worker.url).host)
     assert.equal(diagnostic.connection.owned, true)
     assert.equal(diagnostic.connection.actual.timezone, 'America/Los_Angeles')
     assert.equal(diagnostic.connection.actual.language, 'en-US')
