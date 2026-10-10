@@ -1,0 +1,10 @@
+/node_modules
+/build
+keywords.txt
+
+# Local macOS files
+.DS_Store
+
+# Keep only the current distributable archives in Git
+/LC-time-*.zip
+!/LC-time-1.4.0.zip

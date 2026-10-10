@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="popup-document">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LC-time</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="popup-shell">
+  <header class="topbar">
+    <h1 class="brand">LC<span>-time</span></h1>
+    <button id="infoButton" class="help-button" type="button" aria-label="使用说明" title="使用说明">?</button>
+  </header>
+
+  <main>
+    <section class="clock-panel" aria-label="所选时区的当前时间">
+      <div class="clock-heading"><span id="clockSource">浏览器默认时区</span><span id="applicationState" class="live-label" data-state="pending"><i aria-hidden="true"></i><span id="applicationStateText">待核验</span></span></div>
+      <div class="clock-display" role="timer" aria-live="off" aria-atomic="true">
+        <span id="clockHours">--</span><span class="clock-colon">:</span><span id="clockMinutes">--</span><span id="clockSeconds" class="clock-seconds">--</span>
+      </div>
+      <div id="clockDate" class="clock-date">正在读取时间…</div>
+      <div class="clock-meta"><span id="clockZone">—</span><span id="clockOffset">UTC</span></div>
+    </section>
+
+    <section class="settings" aria-label="时区设置">
+      <div class="field-heading"><label for="configuration">选择时区</label><span>24 小时制</span></div>
+      <select id="configuration" name="configuration" class="field-input">
+        <option value="browserDefault">使用浏览器默认时区</option>
+        <option value="ipAddress" hidden>当前 IP 时区</option>
+        <option value="custom">手动输入时区</option>
+        <optgroup label="常用城市" id="locationsOptGroup"></optgroup>
+        <optgroup label="全部时区" id="timezonesOptGroup"></optgroup>
+      </select>
+      <div id="customTimezoneField" class="custom-field" hidden>
+        <label for="timeZone">时区名称</label>
+        <input id="timeZone" name="timeZone" class="field-input" placeholder="例如 Asia/Shanghai" autocomplete="off" spellcheck="false" aria-describedby="saveStatus">
+      </div>
+      <label class="ip-toggle" for="ipTimezoneToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.5" ry="8.5"/><path d="M3.5 12h17"/></svg>
+        <span class="ip-toggle-copy"><span id="ipToggleLabel">使用当前 IP 时区</span><span id="ipToggleHint">开启后自动获取时区</span></span>
+        <input id="ipTimezoneToggle" class="switch-input" type="checkbox" role="switch" aria-labelledby="ipToggleLabel" aria-describedby="ipToggleHint">
+      </label>
+      <p id="saveStatus" class="save-status" role="status" aria-live="polite">设置自动保存，正在核验当前网页…</p>
+
+      <details class="advanced-settings">
+        <summary>语言、字体与位置<span class="summary-hint">可选</span></summary>
+        <div class="advanced-fields">
+          <label for="locale">网页语言与地区</label>
+          <input id="locale" name="locale" class="field-input" placeholder="例如 zh-CN" autocomplete="off" spellcheck="false">
+          <label for="fontMode">网页默认字体</label>
+          <select id="fontMode" class="field-input"><option value="auto">跟随语言自动选择</option><option value="browser">使用浏览器默认字体</option></select>
+          <p id="fontHint" class="font-hint">影响当前用户配置的默认字体；网站指定的字体优先。</p>
+          <div class="coordinate-fields">
+            <div><label for="latitude">纬度</label><input id="latitude" type="number" name="latitude" class="field-input" step="any" min="-90" max="90" placeholder="未设置"></div>
+            <div><label for="longitude">经度</label><input id="longitude" type="number" name="longitude" class="field-input" step="any" min="-180" max="180" placeholder="未设置"></div>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+  <footer class="footer-bar"><span id="extensionVersion"></span><button id="reloadButton" type="button"><span id="reloadLabel">刷新当前网页</span> <span aria-hidden="true">↻</span></button></footer>
+  <script src="../js/popup.js" type="module"></script>
+</body>
+</html>

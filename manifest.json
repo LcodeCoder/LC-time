@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDesc__",
+  "version": "1.4.0",
+  "author": "LC-time",
+  "default_locale": "en",
+  "background": {
+    "service_worker": "js/background.js",
+    "type": "module"
+  },
+  "options_page": "html/info.html",
+  "action": {
+    "default_popup": "html/popup.html",
+    "default_icon": {
+      "128": "img/icon.png"
+    },
+    "default_title": "LC-time"
+  },
+  "icons": {
+    "128": "img/icon.png"
+  },
+  "permissions": [
+    "storage",
+    "webNavigation",
+    "debugger",
+    "alarms",
+    "fontSettings"
+  ],
+  "minimum_chrome_version": "125"
+}
