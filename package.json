@@ -10,6 +10,6 @@
     "build:css": "tailwindcss -i ./tailwind.css -o ./css/style.css --minify",
     "watch:css": "tailwindcss -i ./tailwind.css -o ./css/style.css --minify --watch",
     "test": "node --test tests/*.test.mjs",
-    "test:browser": "node tests/browser/profiles.cjs && node tests/browser/languages.cjs && node tests/browser/contexts.cjs && node tests/browser/restart.cjs"
+    "test:browser": "node tests/browser/profiles.cjs && node tests/browser/same-process.cjs && node tests/browser/languages.cjs && node tests/browser/contexts.cjs && node tests/browser/restart.cjs"
   }
 }

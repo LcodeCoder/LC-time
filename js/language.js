@@ -55,7 +55,7 @@ export const applyLanguage = async (debuggee, locale) => {
   if (!locale) return
   const actual = await chrome.debugger.sendCommand(target, 'Runtime.evaluate', {
     expression: 'JSON.stringify({language:navigator.language,languages:navigator.languages,locale:Intl.DateTimeFormat().resolvedOptions().locale})',
-    returnByValue: true,
+    returnByValue: true, timeout: 2000, disableBreaks: true,
   })
   if (actual.exceptionDetails || typeof actual.result?.value !== 'string') throw new Error('无法核验网页语言。')
   const observed = JSON.parse(actual.result.value)

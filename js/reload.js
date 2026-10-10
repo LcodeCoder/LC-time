@@ -5,7 +5,7 @@ export const isReloadInProgress = (tabId) => reloadsInProgress.has(tabId)
 
 export const reloadWithSettings = async (tabId) => {
   const before = await applySettingsToTab(tabId, { resume: true })
-  if (!before.ok) return before
+  if (!before.ok && !before.prepared) return before
   // The pre-reload result alone does not prove that the new document kept it.
   let finish
   let timer

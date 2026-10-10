@@ -38,7 +38,7 @@ const applyRegion = async (entry, settings) => {
     } else await send(entry.target, 'Emulation.clearGeolocationOverride')
   }
   const read = await send(entry.target, 'Runtime.evaluate', {
-    expression: 'Intl.DateTimeFormat().resolvedOptions().timeZone', returnByValue: true,
+    expression: 'Intl.DateTimeFormat().resolvedOptions().timeZone', returnByValue: true, timeout: 2000, disableBreaks: true,
   })
   const expected = new Intl.DateTimeFormat('en', timezone ? { timeZone: timezone } : {}).resolvedOptions().timeZone
   if (read.exceptionDetails || read.result?.value !== expected) throw new Error(`后台或内嵌环境时区未一致，目标 ${expected}。`)
@@ -171,7 +171,7 @@ export const restoreRelatedTargets = async tabId => {
     await send(target, 'Emulation.setUserAgentOverride', { userAgent: '' }).catch(() => {})
     await send(target, 'Emulation.setLocaleOverride', { locale: '' }).catch(() => {})
     await send(target, 'Emulation.setTimezoneOverride', { timezoneId: '' }).catch(() => {})
-    await send(target, 'Runtime.evaluate', { expression: 'navigator.languages', returnByValue: true }).catch(() => {})
+    await send(target, 'Runtime.evaluate', { expression: 'navigator.languages', returnByValue: true, timeout: 2000, disableBreaks: true }).catch(() => {})
   }
 }
 
@@ -227,7 +227,7 @@ chrome.debugger.onDetach.addListener((source, reason) => {
   if (entry) {
     if (reason === 'canceled_by_user') {
       entry.owned = false; entry.blocked = true
-      entry.status = { ok: false, message: '后台调试连接被取消，请重新启用设置后刷新。' }
+      entry.status = { ok: false, message: '后台调试连接已断开，请点击恢复并刷新网页。' }
       for (const child of entry.children.values()) child.active = false
     } else { entry.active = false; standalone.delete(source.targetId) }
     publishAll().catch(console.error)

@@ -57,8 +57,12 @@
         </div>
       </details>
     </section>
+    <section id="diagnosticsPanel" class="diagnostics-panel" hidden>
+      <label for="diagnosticsOutput">诊断未能自动复制，请复制下方内容</label>
+      <textarea id="diagnosticsOutput" readonly spellcheck="false" rows="6"></textarea>
+    </section>
   </main>
-  <footer class="footer-bar"><span id="extensionVersion"></span><button id="reloadButton" type="button"><span id="reloadLabel">刷新当前网页</span> <span aria-hidden="true">↻</span></button></footer>
+  <footer class="footer-bar"><span id="extensionVersion"></span><button id="diagnosticsButton" type="button" title="复制连接诊断（不含网址、IP 或坐标）" aria-label="复制连接诊断">诊断</button><button id="reloadButton" type="button"><span id="reloadLabel">刷新当前网页</span> <span aria-hidden="true">↻</span></button></footer>
   <script src="../js/popup.js" type="module"></script>
 </body>
 </html>

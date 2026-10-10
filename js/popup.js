@@ -234,6 +234,29 @@ const handleInputChange = () => {
 fontMode.addEventListener('change', () => { clearTimeout(saveTimer); saveToStorage() })
 ipToggle.addEventListener('change', handleIpToggle)
 $('infoButton').addEventListener('click', () => chrome.tabs.create({ url: 'html/info.html' }))
+$('diagnosticsButton').addEventListener('click', async () => {
+  const button = $('diagnosticsButton')
+  button.disabled = true
+  try {
+    if (!Number.isInteger(activeTabId)) throw new Error('请先打开普通网页。')
+    const report = await chrome.runtime.sendMessage({ type: 'get-tab-diagnostics', tabId: activeTabId })
+    if (!report || report.error) throw new Error(report?.error || '后台未响应。')
+    const text = JSON.stringify(report, null, 2)
+    try {
+      await navigator.clipboard.writeText(text)
+      $('diagnosticsPanel').hidden = true
+      button.textContent = '已复制'
+    } catch {
+      $('diagnosticsPanel').hidden = false
+      $('diagnosticsOutput').value = text
+      $('diagnosticsOutput').focus()
+      $('diagnosticsOutput').select()
+      button.textContent = '手动复制'
+    }
+  } catch (error) {
+    setStatus(`读取诊断失败：${error.message}`, 'error')
+  } finally { button.disabled = false }
+})
 $('reloadButton').addEventListener('click', async () => {
   if (reloadBusy) return
   clearTimeout(saveTimer)
@@ -247,8 +270,8 @@ $('reloadButton').addEventListener('click', async () => {
     const state = await chrome.storage.session.get(`lc-time-coverage:${activeTabId}`)
     coverage = state[`lc-time-coverage:${activeTabId}`] || null
     showApplicationStatus(result)
-  } catch {
-    showApplicationStatus({ ok: false, message: '恢复失败，请关闭此页面的开发者工具或冲突扩展后重试。' })
+  } catch (error) {
+    showApplicationStatus({ ok: false, message: `恢复未完成：${error.message || '后台未响应'}。可点击底部“诊断”查看连接状态。` })
   } finally {
     reloadBusy = false
     syncIpToggle()

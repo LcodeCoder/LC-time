@@ -21,6 +21,7 @@ test('refresh verifies the new document, reports cancellation or conflict, and c
   let languages = ['en-US', 'en']
   let scenario = 'success'
   let commandFailure = false
+  let loadingDocument = false
   let manager
   globalThis.chrome = {
     fontSettings: fakeFontSettings(),
@@ -33,7 +34,7 @@ test('refresh verifies the new document, reports cancellation or conflict, and c
       },
     },
     tabs: {
-      get: async () => ({ id: 1, url: 'https://test.example/' }),
+      get: async () => ({ id: 1, url: 'https://test.example/', status: loadingDocument ? 'loading' : 'complete' }),
       onUpdated: updated,
       onRemoved: removed,
       reload: async () => {
@@ -45,6 +46,7 @@ test('refresh verifies the new document, reports cancellation or conflict, and c
           detached.emit({ tabId: 1 }, 'canceled_by_user')
         }
         if (scenario === 'conflict') commandFailure = true
+        loadingDocument = false
         updated.emit(1, { status: 'complete' })
       },
     },
@@ -54,6 +56,7 @@ test('refresh verifies the new document, reports cancellation or conflict, and c
       onDetach: detached,
       sendCommand: async (_, command, params) => {
         if (!connected) throw Error('Debugger is not attached')
+        if (command === 'Page.getFrameTree') return { frameTree: { frame: { url: loadingDocument ? '' : 'https://test.example/', loaderId: 'doc-1' } } }
         if (command === 'Emulation.setTimezoneOverride') {
           if (commandFailure) throw Error('Timezone override is already in effect')
           timezone = params.timezoneId
@@ -67,6 +70,8 @@ test('refresh verifies the new document, reports cancellation or conflict, and c
   manager = await import('../js/reload.js')
   const removedBaseline = removed.listeners.size
   assert.equal((await manager.reloadWithSettings(1)).timezone, 'America/Los_Angeles')
+  loadingDocument = true
+  assert.equal((await manager.reloadWithSettings(1)).code, 'applied', 'a prepared blank document can be refreshed and verified')
   scenario = 'cancel'
   assert.equal((await manager.reloadWithSettings(1)).code, 'paused')
   assert.equal(connected, false, 'cancel during refresh must not be silently overridden')

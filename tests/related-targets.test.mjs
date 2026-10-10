@@ -78,7 +78,7 @@ test('standalone discovery stays within owned origins, respects cancel, explicit
     h.attached.delete('shared')
     await h.manager.scanRelatedWorkers()
     assert.equal(h.calls.filter(call => call.method === 'attach').length, 1)
-    assert.match(h.session['lc-time-coverage:1'].errors[0].message, /取消/)
+    assert.match(h.session['lc-time-coverage:1'].errors[0].message, /断开/)
     await h.manager.updateRelatedTargets(1, { resume: true })
     assert.equal(h.calls.filter(call => call.method === 'attach').length, 2)
     assert.deepEqual([...h.attached], ['shared'])

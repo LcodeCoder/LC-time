@@ -102,3 +102,7 @@ select.field-input { padding-right: 28px; appearance: none; background-image: ur
 @media (max-width: 380px) { .info-shell { padding: 24px 16px; } .info-content { padding: 20px; } }
 
 .font-hint { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+
+.diagnostics-panel { padding: 0 24px 16px; font-size: 10px; color: var(--muted); }
+.diagnostics-panel label { display: block; margin-bottom: 8px; }
+.diagnostics-panel textarea { display: block; width: 100%; box-sizing: border-box; resize: vertical; border: 1px solid var(--line); border-radius: 6px; padding: 8px; font: 10px/1.5 monospace; color: #334155; background: #f8fafc; }
